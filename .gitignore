@@ -1,0 +1,10 @@
+# 临时实验产物（验证脚本的中间输出等）
+scratch/
+
+# 项目任务书：内部工作文档，不入库（结构以 README 为准）
+任务书.md
+
+# OS 杂物
+Thumbs.db
+.DS_Store
+desktop.ini

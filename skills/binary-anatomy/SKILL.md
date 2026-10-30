@@ -1,0 +1,64 @@
+---
+name: binary-anatomy
+description: 看穿任意二进制文件的真实格式与内部结构。当用户问"这个文件打不开/是不是坏了"、"这是什么格式"、"文件头在哪"、"这两个文件差在哪"、"帮我看下这个 exe/dll/png/zip"、"what format is this file"、"is this file corrupted"、"why won't this file open"时使用。只读解析，不修改目标文件。
+---
+
+# 二进制解剖：看穿文件真实格式
+
+## 何时用
+
+用户拿到一个打不开、看不懂、疑似损坏的文件，或想知道两个文件差在哪。
+基于**魔数**识别格式（不信任扩展名），给出逐字段的结构树、损坏检测、对比。
+
+## 前置检查
+
+```bash
+python -m ffe --help
+```
+
+- 显示 `usage: ffe ...` → 可用。
+- 报 `No module named ffe` → ffe 以源码目录运行：进入其检出目录后再跑
+  （本机检出：`E:\code\file-format-explorer`；其他机器先
+  `git clone https://github.com/HarryHeYu/file-format-explorer`）。
+  **所有命令都要带 `cd <ffe目录> &&`**，因为 shell 每次调用会重置工作目录。
+- 支持 8 种格式：**PNG / WAV / JPEG / ZIP / PE(exe,dll) / ELF / SQLite / MP4**。
+  适配：CLI 与 GUI 共用 parser core，纯标准库，Python 3.10+。
+
+## 命令配方
+
+```bash
+cd <ffe目录> && python -m ffe info <文件>        # JSON 摘要：格式/大小/ok（起步必用）
+cd <ffe目录> && python -m ffe inspect <文件>     # 完整结构树（--depth N 限深，默认 3）
+cd <ffe目录> && python -m ffe validate <文件>    # 结构校验，输出 VALID / INVALID
+cd <ffe目录> && python -m ffe report <文件> -o report.md   # Markdown 报告落盘
+cd <ffe目录> && python -m ffe diff <文件A> <文件B>          # 字节差异 + 结构差异
+```
+
+`info`/`inspect`/`report`/`diff` 都支持 `--json`（供程序解析）；给人看时用
+默认文本树，`report` 默认即 Markdown。
+
+## 输出解读
+
+- `info`：`format` 是按魔数判定的真实格式；`messages` 列出解析中发现的疑点
+  （坏 CRC、截断、超界指针都会出现在这，而不是崩溃）；`ok` 为解析成败。
+- `inspect` 树：每层是字段名=值，offset 可回溯到原始字节。
+- `diff`：上半是字节级差异区间（"N bytes differ in K run(s)"），下半
+  "Structural differences" 把差异翻译成字段级，如
+  `~ PNG/IHDR/Data/Width: 320 → 1024`——给用户讲差异就用这段。
+- `validate` 只答 VALID/INVALID，定位损坏点要靠 `inspect` 或 `report` 的
+  errors/warnings 段。
+
+## 失败处理
+
+- 输出 `Unrecognized format: <路径>`（退出码 1）→ 如实告诉用户
+  "8 种格式之外，无法解析"，**列出支持的 8 种，绝不猜测格式**。
+- 文件不存在 / 无读权限 → 原样转述，不做二次猜测。
+- 另一工具对某文件报出隐晦错误（如 OCR 报 `WinError -2003292336`）时，
+  可先用本 skill 的 `info` 查该文件是否本身就是坏的——魔数不对
+  比报错信息更有说服力。
+
+## 红线
+
+- **只读解析**。绝不修改、重命名、移动目标文件；`report -o` 的输出路径
+  必须先经用户确认，且不落在目标文件所在目录之外。
+- 格式不在 8 种之内时明说"不支持"，不编造结构。
