@@ -1,5 +1,10 @@
 # skills-arsenal 🧰
 
+[![Release](https://img.shields.io/github/v/release/HarryHeYu/skills-arsenal)](https://github.com/HarryHeYu/skills-arsenal/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Platform](https://img.shields.io/badge/platform-ZCode%20%7C%20Claude%20Code-black)
+![Bench](https://img.shields.io/badge/skills-4%20verified%20%2B%20cold--start%20tested-brightgreen)
+
 四个 [Agent Skills](https://code.claude.com/docs/en/skills)（SKILL.md 格式，**ZCode** 与 **Claude Code** 通用），教会你的编码 Agent 驱动四个久经验证的本地 CLI 工具。
 
 > Skill 不实现逻辑，只教 Agent 用好现有 CLI——工具是引擎，SKILL.md 是说明书。
