@@ -1,0 +1,17 @@
+{
+  "name": "skills-arsenal",
+  "plugins": [
+    {
+      "name": "skills-arsenal",
+      "source": "./",
+      "version": "0.1.0",
+      "description": "Four agent skills wrapping battle-tested local CLIs: repo archaeology, binary anatomy, disk usage, screen OCR.",
+      "displayName": "Skills Arsenal",
+      "displayName_i18n": { "zh-CN": "技能军火库" },
+      "description_i18n": {
+        "zh-CN": "四个把久经验证的本地 CLI 包装成 Agent Skills：仓库考古（arch）/ 二进制解剖（ffe）/ 磁盘解剖（dirwhale）/ 截图 OCR（screen_command）。每个 skill 附真实触发验证记录。"
+      },
+      "category": "developer-tools"
+    }
+  ]
+}

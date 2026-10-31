@@ -58,6 +58,23 @@ cp -r skills/<skill-name> ~/.agents/skills/      # ZCode
 
 Or reference this repo directly if your harness supports workspace skills.
 
+## Install as a plugin (marketplace)
+
+This repo is itself a plugin marketplace — one plugin bundles all four skills.
+
+**Claude Code:**
+
+```text
+/plugin marketplace add HarryHeYu/skills-arsenal
+/plugin install skills-arsenal@skills-arsenal
+```
+
+**ZCode:** open **Plugin Marketplace → Add → Add Plugin Marketplace**, paste
+`https://github.com/HarryHeYu/skills-arsenal`, then install **Skills Arsenal**.
+
+After installing, the four skills trigger on natural language as usual — check
+`Settings → Plugins` to manage them.
+
 ## Three-line demos
 
 **repo-archaeology** — *"what is this repo?"*

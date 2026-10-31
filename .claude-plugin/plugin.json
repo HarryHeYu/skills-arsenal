@@ -1,0 +1,7 @@
+{
+  "name": "skills-arsenal",
+  "version": "0.1.0",
+  "description": "Four agent skills wrapping battle-tested local CLIs: repo archaeology (arch), binary anatomy (ffe), disk usage analysis (dirwhale), screen OCR (screen_command).",
+  "author": { "name": "HarryHeYu" },
+  "skills": "./skills"
+}

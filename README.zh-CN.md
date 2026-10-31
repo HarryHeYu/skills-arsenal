@@ -59,6 +59,22 @@ cp -r skills/<skill-name> ~/.agents/skills/      # ZCode
 
 若 harness 支持工作区级 skill，直接引用本仓库即可。
 
+## 以插件安装（插件市场）
+
+本仓库本身就是一个插件市场——一个插件打包全部四个 skill。
+
+**Claude Code：**
+
+```text
+/plugin marketplace add HarryHeYu/skills-arsenal
+/plugin install skills-arsenal@skills-arsenal
+```
+
+**ZCode：**打开 **插件市场 → 添加 → 添加插件市场**，粘贴
+`https://github.com/HarryHeYu/skills-arsenal`，然后安装 **技能军火库**。
+
+安装后四个 skill 照常靠自然语言触发，可在 **设置 → 插件** 里管理。
+
 ## 三行动画式示例
 
 **repo-archaeology** — *"这个仓库是干嘛的？"*
