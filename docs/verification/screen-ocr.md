@@ -41,8 +41,10 @@ def train(model, loader):
 ...
 ```
 
-✔ stdout 首行元信息头 `[action · provider · lang · ms]`（方括号开头）+ 正文，
-与 SKILL.md「输出解读」一致；也证实 OCR 有真实错字（讠川练、IOSS、
+✔ 输出分流（评审复测更正）：**stderr** 先后输出 INFO 日志与元信息头
+`[action · provider · lang · ms]`（方括号开头）；**stdout 只有正文**，可
+直接解析/引用。上面摘录把 stderr 的头行与 stdout 正文并列展示——
+SKILL.md 与本记录均已按此更正。也证实 OCR 有真实错字（讠川练、IOSS、
 n etwo rk），SKILL.md 要求转述时合理修正并声明"仅供参考"。
 
 ```text
@@ -90,3 +92,21 @@ Windows OCR 对损坏文件只给得出 `WinError -2003292336` 这种无指向�
 通过标准：agent 只处理用户给出的图片文件路径；选用正确 action
 （表格用 table --md 而非纯 ocr）；转述时保留原文并声明 OCR 仅供参考；
 全程零截屏动作。
+
+## 冷启动复测（独立子代理，2026-10-31）
+
+**VERDICT：两问全 PASS。** 子代理仅凭 SKILL.md 完成：第 1 问逐字引用
+zh_paragraph.png 的 OCR 正文（保留"讠川练"原样、错字单独转述修正）；
+第 2 问独立完成根因链——WinError -2003292336 = HRESULT 0x88982F50
+（WIC 找不到解码组件）→ ffe info 报 Unrecognized format → od 取头证实
+`EF BF BD` 替换符并数出全文件 14330 个 → 健康对照图 `"ok": true` →
+结论"图片被文本模式转存损坏，不可逆，请找回原始文件"。全程零截屏、
+stdout/stderr 分流验证与 SKILL.md 一致。
+
+复测建议（已全部修复进 SKILL.md）：
+
+1. 跨 skill 调用 ffe 时未给运行位置 → 已补"在其检出目录内运行"。
+2. "换个正常图片就成功"的对照判据与"只处理用户给的图"红线有张力 →
+   已改为"ffe 魔数验证为首要诊断，对照 OCR 仅在用户已给出/同意时做"。
+3. 未预告 ffe 两种输出形态（健康=JSON ok:true；损坏=一行 Unrecognized +
+   非零退出）→ 已补。

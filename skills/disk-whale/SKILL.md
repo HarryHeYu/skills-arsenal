@@ -1,6 +1,6 @@
 ---
 name: disk-whale
-description: 磁盘解剖——看清空间都被谁吃了。当用户问"盘怎么又满了"、"这个目录谁吃的"、"node_modules 在哪"、"什么类型的文件占大头"、"C 盘红色了帮我看看"、"what's eating my disk space"、"which folder is the biggest"时使用。只分析，绝不删除。
+description: 磁盘解剖——看清空间都被谁吃了。当用户问"盘怎么又满了"、"这个目录谁吃的"、"node_modules 在哪"、"什么类型的文件占大头"、"帮我清理磁盘"、"删东西之前先帮我看看哪些能删"、"C 盘红色了帮我看看"、"what's eating my disk space"、"which folder is the biggest"时使用。只分析，绝不删除。
 ---
 
 # 磁盘解剖：谁吃了空间
@@ -17,7 +17,8 @@ dirwhale -V
 ```
 
 - 输出 `dirwhale 0.2.2` → 可用（适配 **0.2.x**）。
-- 未找到 → 单文件 exe，克隆即用：
+- 未找到 → 先确认机器上是否已有检出（可询问用户），有就直接用完整路径，
+  无需重复克隆；确实没有 → 单文件 exe，克隆即用：
   `git clone https://github.com/HarryHeYu/dirwhale`，Windows 用其中
   `dirwhale.exe`（或 `gcc -O2 -o dirwhale src/main.c` 自编译），
   然后把它加入 PATH 或下面所有命令用完整路径。
@@ -39,12 +40,17 @@ dirwhale -d 2 --json tree.json <路径>          # 全树 JSON 落盘，供后�
 python -c "import json;d=json.load(open('tree.json'));print(d['size'],d['files'])"
 ```
 
+路径含空格或反斜杠时用引号包住；不允许写文件的环境（只读审计等）跳过
+`--json`，改用调大 `-d`/`-n` 的直接输出。
+
 ## 输出解读
 
 - 首行 `<路径> [总大小, 文件数]`；树里 `名字/` 是目录，`|- ... and N more
   entries` 表示本级还有 N 项未展示（`-n` 调大即可看全）。
 - `-t` 的类型分布按扩展名聚合：`<扩展名> <大小> (<文件数>)`，
-  `(none)` 表示无扩展名文件——定位"什么类型占大头"看这里。
+  `(none)` 表示无扩展名文件——定位"什么类型占大头"看这里。类型榜只有
+  聚合值没有路径；类型对不上树（如 pyc 藏在深层 `__pycache__`）时，
+  对小目录加 `-d 3`/`-d 4` 下钻找归属。
 - 给用户的建议格式：3 个最大目录/类型 + 各一句"这通常是什么、
   能不能动"，并明确"是否删除由你决定"。
 

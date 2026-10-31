@@ -18,10 +18,12 @@ arch --version
 
 - 输出形如 `arch 0.4.0` → 可用（适配版本 **0.4.0**）。
 - ⚠️ Git Bash / MSYS 里 `arch` 是 GNU coreutils 同名命令。若输出含
-  "GNU coreutils"，改用 `python -m archaeologist.cli --version` 验证。
-- 都失败 → 未安装，给用户安装指引后**停止**：
-  `pipx install repo-archaeologist`（或 `pip install repo-archaeologist`，
-  源码：`pip install git+https://github.com/HarryHeYu/archaeologist.git`）
+  "GNU coreutils"，改用 `python -m archaeologist.cli --version` 验证；
+  一旦走这条替代路径，**下文配方里的 `arch` 全部替换为
+  `python -m archaeologist.cli` 执行**。
+- 都失败 → 未安装，给用户安装指引后**停止**。注意：PyPI 上的发布停留在
+  0.1.x，落后于本 skill 适配的 0.4.0（缺 file/why/deps 等），请装源码版：
+  `pip install git+https://github.com/HarryHeYu/archaeologist.git`
 
 ## 命令配方
 
@@ -49,8 +51,9 @@ Markdown 报告（写到用户工作区内，写到哪先说一声）。
 
 scan 报告六段：**Languages**（语言占比）→ **Repository Structure**（每个顶层
 目录的用途猜测）→ **Likely Entrypoints**（入口文件）→ **Hot Files**（按变更
-频率+近期活跃打分，score 越高越是核心）→ **Recent Changes**（30 天改动分布）
-→ **Contributors**（每人改动量与主战场）。摘要时按这个顺序各给一两句即可。
+频率+近期活跃打分，score 越高越是核心）→ **Recent Changes**（近期改动分布；
+实际窗口看输出标题，默认 365 天）→ **Contributors**（每人改动量与主战场）。
+摘要时按这个顺序各给一两句即可。
 
 ## 失败处理
 
@@ -59,9 +62,14 @@ scan 报告六段：**Languages**（语言占比）→ **Repository Structure**�
 - **命令不存在**：按前置检查给安装指引，不要尝试 pip install 之外的猜测。
 - **timeline 输出很长**：绝不整段倾倒进上下文——先自己读，压缩成 3-5 条
   关键节点再给用户；用户要细节时按年份截取。
+- **recent 的窗口回退**：请求窗口内没有提交时，工具会**静默**把窗口放宽到
+  365 天（仅输出标题变化，无提示）。核对标题里的实际窗口；窗口为空就如实
+  说"该窗口内无提交"，别把放宽后的结果当"最近"汇报。
 
 ## 红线
 
 - **只读**。不运行仓库里的任何代码，不执行 build/test 脚本，不写任何文件
   进目标仓库。
-- 先摘要后深挖，未经追问不主动连跑多个重命令（尤其 timeline）。
+- 先摘要后深挖，未经追问不主动连跑多个重命令（尤其 timeline）。用户一条
+  消息里同时问了几个方面（是干嘛的/核心在哪/最近改什么）时，视为已有
+  追问，scan 后允许补跑 hot/recent 等对应命令。

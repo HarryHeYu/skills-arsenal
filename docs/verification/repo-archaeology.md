@@ -19,6 +19,16 @@ arch 0.4.0                         ← 可靠调用方式（console script 未�
 `python -m archaeologist.cli`（或 `python -m archaeologist`，含 `__main__.py`）
 是稳定入口。SKILL.md 的前置检查已按此写成两级探测。
 
+## 安装指引佐证（评审补充，2026-10-31）
+
+```text
+$ python -m pip index versions repo-archaeologist
+Available versions: 0.1.2, 0.1.1, 0.1.0 (LATEST 0.1.2)
+```
+
+✔ PyPI 最新只有 **0.1.2**，不含 v0.4.0 的 file/why/deps 子命令——SKILL.md
+与 README 的安装指引已改为"从 git 安装源码版"，并注明 PyPI 落后。
+
 ## 命令配方实测
 
 目标：真实仓库 `E:\code\dirwhale`（git，main，5 commits）。
@@ -86,3 +96,21 @@ SKILL.md 已按 12 个写）。全工具无 `--json` 模式——SKILL.md 未承
 
 通过标准：agent 未被告知任何命令的情况下调用 arch 并给出结构化摘要；
 对追问能选用正确的深挖子命令；不把 timeline 全量倒进上下文。
+
+## 冷启动复测（独立子代理，2026-10-31）
+
+**VERDICT：PASS-WITH-FRICTION。** 子代理仅凭 SKILL.md 完成任务：两级前置
+检查正确命中 coreutils 冲突并切到 `python -m archaeologist.cli`；scan 六段
+摘要覆盖全部三问；hot/recent 仅按用户追问触发；全程零写文件、未碰
+timeline。实测目标：E:\code\archaeologist（7 commits，Python 90.4%）。
+
+复测抓到的问题（已全部修复进 SKILL.md）：
+
+1. **major**：`recent --days 30` 在窗口内无提交时被工具**静默放宽到 365 天**
+   （仅标题变化）。已写入「失败处理」：核对标题实际窗口，空窗口如实说明。
+2. minor：scan 六段描述原写"30 天改动分布"，实际默认窗口 365 天 → 已改为
+   "实际窗口看输出标题"。
+3. minor：coreutils 回退后，配方里 `arch` 需整体替换为
+   `python -m archaeologist.cli` → 已在前置检查显式写明。
+4. minor：用户一条消息问多件事时是否算"已有追问"原属自行解释 → 已在
+   红线中明确"视为已有追问，允许补跑 hot/recent"。

@@ -18,11 +18,12 @@ python -m ffe --help
 
 - 显示 `usage: ffe ...` → 可用。
 - 报 `No module named ffe` → ffe 以源码目录运行：进入其检出目录后再跑
-  （本机检出：`E:\code\file-format-explorer`；其他机器先
-  `git clone https://github.com/HarryHeYu/file-format-explorer`）。
+  （`git clone https://github.com/HarryHeYu/file-format-explorer`
+  后进入该目录）。
   **所有命令都要带 `cd <ffe目录> &&`**，因为 shell 每次调用会重置工作目录。
 - 支持 8 种格式：**PNG / WAV / JPEG / ZIP / PE(exe,dll) / ELF / SQLite / MP4**。
-  适配：CLI 与 GUI 共用 parser core，纯标准库，Python 3.10+。
+  适配：以 2026-10-31 的 main 分支检出为准（源码运行，工具本身无版本号）；
+  CLI 与 GUI 共用 parser core，纯标准库，Python 3.10+。
 
 ## 命令配方
 
@@ -34,28 +35,38 @@ cd <ffe目录> && python -m ffe report <文件> -o report.md   # Markdown 报告
 cd <ffe目录> && python -m ffe diff <文件A> <文件B>          # 字节差异 + 结构差异
 ```
 
-`info`/`inspect`/`report`/`diff` 都支持 `--json`（供程序解析）；给人看时用
-默认文本树，`report` 默认即 Markdown。
+`inspect`/`report`/`diff` 支持 `--json`（供程序解析）；`info` 输出本身就
+是 JSON。给人看时用默认文本树，`report` 默认即 Markdown（`-o` 落盘）。
 
 ## 输出解读
 
 - `info`：`format` 是按魔数判定的真实格式；`messages` 列出解析中发现的疑点
-  （坏 CRC、截断、超界指针都会出现在这，而不是崩溃）；`ok` 为解析成败。
-- `inspect` 树：每层是字段名=值，offset 可回溯到原始字节。
-- `diff`：上半是字节级差异区间（"N bytes differ in K run(s)"），下半
+  （坏 CRC、截断、超界指针都会出现在这，而不是崩溃）；`ok` 为解析成败；
+  `image` 块仅 PNG 有值，其他格式为空对象。
+- `inspect` 树：每层是字段名=值，offset 可回溯到原始字节。默认深度 3 已够
+  PE 全貌；导入函数名在 `--depth 4`。
+- `diff`：上半是字节级差异（"differing bytes: N in K run(s)"），下半
   "Structural differences" 把差异翻译成字段级，如
-  `~ PNG/IHDR/Data/Width: 320 → 1024`——给用户讲差异就用这段。
+  `~ PNG/IHDR/Data/Width: 320 → 1024`——给用户讲差异就用这段。注意
+  run 行的字节数是覆盖区间长度，可与 differing bytes 计数不同。
 - `validate` 只答 VALID/INVALID，定位损坏点要靠 `inspect` 或 `report` 的
   errors/warnings 段。
 
 ## 失败处理
 
-- 输出 `Unrecognized format: <路径>`（退出码 1）→ 如实告诉用户
-  "8 种格式之外，无法解析"，**列出支持的 8 种，绝不猜测格式**。
+`Unrecognized format: <路径>`（退出码 1）分两支判断：
+
+- **魔数不属于 8 种格式** → 如实说"无法解析"，列出支持的 8 种，**绝不猜测**。
+- **扩展名/上下文指向 8 种之一但魔数不符** → 这是该格式的**损坏文件**
+  （常见成因：图片被文本模式转存，高位字节全被替换成 EF BF BD）。
+  用只读窥视取证：`head -c 16 <文件> | od -A x -t x1`，对照标准魔数
+  （PNG `89 50 4E 47 0D 0A 1A 0D`、PE `4D 5A`、ZIP `50 4B`），告诉用户
+  "疑似 X 格式的损坏文件，头部已毁"——不编造结构、不尝试修复。
+
 - 文件不存在 / 无读权限 → 原样转述，不做二次猜测。
 - 另一工具对某文件报出隐晦错误（如 OCR 报 `WinError -2003292336`）时，
-  可先用本 skill 的 `info` 查该文件是否本身就是坏的——魔数不对
-  比报错信息更有说服力。
+  先用本 skill 的 `info` 查该文件是否本身就是坏的——魔数不对比报错
+  信息更有说服力。
 
 ## 红线
 

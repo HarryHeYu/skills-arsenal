@@ -53,10 +53,10 @@ file types:
 类目）与 SKILL.md「输出解读」一致；中文文件名（任务书.md）显示正常。
 
 ```text
-$ dirwhale.exe -d 2 -n 6 --json tree.json -q E:\code\dirwhale
+$ dirwhale.exe -d 2 -n 6 --json scratch\dirwhale.json -q E:\code\dirwhale
 JSON written to E:\code\skills-arsenal\scratch\dirwhale.json
 
-$ head -c 400 tree.json
+$ head -c 400 scratch\dirwhale.json
 {"name":"E:\\code\\dirwhale","path":"E:\\code\\dirwhale","is_dir":true,
  "size":324335,"files":78,"children":[{"name":".git","path":"...",
  "children":[{"name":"objects",...{"name":"41",...{"name":"b7e2d4395dec..."}}]}]}]}
@@ -82,3 +82,21 @@ $ head -c 400 tree.json
 
 通过标准：agent 起步即用 `-d 2 -n 10 -t` 级别的克制参数而非全量深扫；
 给结论时附**建议**清理项且明确"删除由你决定"；全程零删除动作。
+
+## 冷启动复测（独立子代理，2026-10-31）
+
+**VERDICT：PASS-WITH-FRICTION（全部 minor）。** 子代理仅凭 SKILL.md 完成
+对 E:\code\file-format-explorer 的解剖（2.35 MiB / 201 files）：起步配方
+`-d 2 -n 10 -t`，追加 `-e .git` 排除验证，`-d 3` 下钻把类型榜的 pyc/dll/exe
+精确归属到 4 个 `__pycache__`（283 KiB/29 文件）与 `samples/pe/` 测试样本；
+结论"唯一可清理项是可再生的 __pycache__，删除由你决定"。全程零删除、
+零写文件、只扫指定路径。
+
+复测建议（已全部修复进 SKILL.md）：
+
+1. 路径含空格/反斜杠要加引号；禁写环境跳过 `--json` 改用直接输出 → 已写。
+2. 类型榜只有聚合值没有路径，需 `-d 3`/`-d 4` 下钻找归属 → 已写。
+3. 前置检查先找已有检出用完整路径，避免诱导重复克隆 → 已写。
+4. `--json` 的 python 取节点示例键名（`size`/`files`）经 dirwhale 源码
+   src/main.c:715 独立证实与 0.2.2 的 JSON schema 一致（评审 R2 完成，
+   子代理因禁写未实测）。

@@ -58,6 +58,23 @@ $ python -m ffe report E:\code\dirwhale\dirwhale.exe | head
 - Imports: 12 DLLs, 82 functions
 ```
 
+## 命令旗标佐证（评审补充，2026-10-31）
+
+```text
+$ python -m ffe report --help
+usage: ffe report [-h] [--json] [-o OUTPUT] [--depth DEPTH] file
+  --json               JSON instead of Markdown
+  -o, --output OUTPUT  Write to file (default: stdout)
+  --depth DEPTH        Tree depth limit (default 3)
+
+$ python -m ffe info --help
+usage: ffe info [-h] file          ← info 没有 --json 旗标：它本身就是 JSON 输出
+```
+
+✔ SKILL.md 的 `report -o report.md` 旗标属实；"info 无 --json、本身就是
+JSON"已据此在 SKILL.md 中更正。`inspect`/`report`/`diff` 的 `--json` 均在
+各自 usage 行中。
+
 ## diff 实测（两张真实 PNG）
 
 ```text
@@ -110,3 +127,21 @@ screen-command 的测试夹具 `table.png`/`formula.png` 使 Windows OCR 报
 
 通过标准：agent 对未知格式如实说"不支持"并列 8 种格式，绝不猜；
 对损坏文件能定位到具体偏移；只读，不改动目标文件。
+
+## 冷启动复测（独立子代理，2026-10-31）
+
+**VERDICT：三问 = PASS-WITH-FRICTION / PASS / PASS。** 子代理仅凭 SKILL.md
+完成全部三问：坏图（table.png）判损坏并给出魔数证据（od 取头 16 字节，
+`EF BF BD 50 4E 47…`）；diff 直达结构差异；PE 全貌 + `--depth 4` 列出
+全部导入函数名。全程零写文件、未猜格式。
+
+复测抓到的问题（已全部修复进 SKILL.md）：
+
+1. **major**：原失败话术对"**受支持格式的损坏文件**"（恰是 table.png 这
+   种）会引导出"8 种之外"的事实错误结论 → 已拆成两支：魔数不属于 8 种 =
+   不支持；魔数不符但上下文指向某格式 = 损坏文件，并新增只读窥视配方
+   `head -c 16 <文件> | od -A x -t x1` + 标准魔数对照。
+2. minor：diff 输出里 run 覆盖长度与 differing bytes 计数不同，未说明会
+   被当成矛盾 → 已在「输出解读」注明。
+3. minor：`info` 的 `image` 块仅 PNG 有值（PE 为空对象）→ 已注明。
+4. minor：导入函数名在 `--depth 4` → 已注明。
